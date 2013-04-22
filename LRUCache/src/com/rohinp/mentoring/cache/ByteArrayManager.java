@@ -56,14 +56,15 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]> {
 		// Number of memory blocks required to store the value
 		int memoryBlocks = (int) Math.ceil(value.length / (double) BLOCK_SIZE);
 		// Track memory balance
-		int memoryBalance = value.length;
+		int storageBalance = value.length;
 		// Track index in memory storage
 		int memoryIndex;
 		// Track index in byte array
 		int valueIndex = 0;
 		
+		// Create memory location object to track the memory locations.
 		MemoryLocation memoryLocations = new MemoryLocation(BLOCK_SIZE);
-		
+	
 		// Store value to memory 
 		for (int i = 0; i < memoryBlocks; i++) {
 			
@@ -72,21 +73,21 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]> {
 			
 			memoryLocations.put(memoryIndex);
 			
-			if (memoryBalance >= BLOCK_SIZE) {
+			if (storageBalance >= BLOCK_SIZE) {
 				for (int j=0; j<BLOCK_SIZE; j++) {
 					memory_[memoryIndex] = value[valueIndex];
 					memoryIndex++;
 					valueIndex++;
 				}
 			} else {
-				memoryLocations.setTerminator(BLOCK_SIZE-memoryBalance);
-				for (int k = 0; k < memoryBalance;k++) {
+				memoryLocations.setTerminator(BLOCK_SIZE-storageBalance);
+				for (int k = 0; k < storageBalance;k++) {
 					memory_[memoryIndex] = value[valueIndex];
 					memoryIndex++;
 					valueIndex++;
 				}				
 			}
-			memoryBalance -= BLOCK_SIZE;
+			storageBalance -= BLOCK_SIZE;
 		}
 		
 		lookupTable_.put(key, memoryLocations);
