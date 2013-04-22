@@ -151,8 +151,5 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]> {
 		
 		lookupTable_.remove(key);
 
-	}
-
-
-	
+	}	
 }
