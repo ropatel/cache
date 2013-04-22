@@ -2,19 +2,30 @@ package com.rohinp.mentoring.cache;
 
 import java.util.LinkedList;
 
-public class LRUCache<K> implements CacheManager<String> {
+public class LRUCache<K> implements CacheManager<String>
+{
 	
 	private LinkedList <String> cacheIndex;
 	
-	public LRUCache() {
+	public LRUCache()
+	{
 		cacheIndex = new LinkedList <String>();
 	}
 
-	@Override
-	public void get(String key) {
+
+	/**
+	 * Executes a get against the cache
+	 * The cache re-orders the entry based on the 
+	 * item that was fetched.
+	 *
+	 * @param key  Key for fetched entry
+	 * @throws Missing from cache
+	 */	
+	public void get(String key)
+	{
 		int targetIndex = cacheIndex.indexOf(key);
 		
-		if ( targetIndex < 0) {
+		if (targetIndex < 0) {
 			//TODO - Throw exception - item missing from cache
 		} else {
 			cacheIndex.remove(targetIndex);
@@ -23,14 +34,28 @@ public class LRUCache<K> implements CacheManager<String> {
 	}
 
 
-	@Override
-	public void put(String key) {				
+	/**
+	 * Puts an entry into the cache
+	 *
+	 * @param key  Key for entry stored
+	 * @throws Missing from cache
+	 */	
+	public void put(String key)
+	{				
 		cacheIndex.push(key);
 	}
 
-	@Override
-	public void evict(String key) {
+
+	/**
+	 * Evicts the LRU entry from the cache
+	 *
+	 * @throws Missing from cache
+	 */		
+	public void evict()
+	{
 		cacheIndex.removeLast();
-	}	
+	}
+	
+	
 
 }
