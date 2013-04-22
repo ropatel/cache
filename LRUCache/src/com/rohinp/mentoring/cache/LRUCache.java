@@ -6,7 +6,14 @@ public class LRUCache<K> implements CacheManager<String>
 {
 	
 	private LinkedList <String> cacheIndex;
+
 	
+	
+	/**
+	 * Constructor - initializes the cache index. 
+	 *
+	 * @throws Missing from cache
+	 */		
 	public LRUCache()
 	{
 		cacheIndex = new LinkedList <String>();
@@ -14,12 +21,7 @@ public class LRUCache<K> implements CacheManager<String>
 
 
 	/**
-	 * Executes a get against the cache
-	 * The cache re-orders the entry based on the 
-	 * item that was fetched.
-	 *
-	 * @param key  Key for fetched entry
-	 * @throws Missing from cache
+	 * {@inheritDoc}
 	 */	
 	public void get(String key)
 	{
@@ -35,10 +37,7 @@ public class LRUCache<K> implements CacheManager<String>
 
 
 	/**
-	 * Puts an entry into the cache
-	 *
-	 * @param key  Key for entry stored
-	 * @throws Missing from cache
+	 * {@inheritDoc}
 	 */	
 	public void put(String key)
 	{				
@@ -47,9 +46,7 @@ public class LRUCache<K> implements CacheManager<String>
 
 
 	/**
-	 * Evicts the LRU entry from the cache
-	 *
-	 * @throws Missing from cache
+	 * {@inheritDoc}
 	 */		
 	public void evict()
 	{

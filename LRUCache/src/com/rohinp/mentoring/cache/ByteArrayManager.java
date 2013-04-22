@@ -11,7 +11,16 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 	
 	private static final int DEFAULT_MAX_SIZE = 6000;
 	private static final int BLOCK_SIZE = 4;
+
 	
+	
+	/**
+	 * Constructor
+	 * Initializes the memory, free memory stack 
+	 * and byte array hashmap.
+	 *
+	 * @throws Missing from cache
+	 */	
 	public ByteArrayManager()
 	{		
 		// Create initial memory space
@@ -29,8 +38,11 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 		}
 	}
 
+
 	
-	
+	/**
+	 * Returns the default maximum storage capacity
+	 */	
 	public int getDefaultMaxCapacity()
 	{
 		return DEFAULT_MAX_SIZE;
@@ -38,6 +50,9 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 
 	
 	
+	/**
+	 * {@inheritDoc}
+	 */	
 	public int getCapacity()
 	{
 		return (freeMemory_.size() * BLOCK_SIZE);
@@ -45,6 +60,9 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 
 	
 	
+	/**
+	 * {@inheritDoc}
+	 */	
 	public boolean isCapacityAvailable(byte[] value)
 	{
 		if (value.length <= freeMemory_.size() * BLOCK_SIZE) {
@@ -54,8 +72,11 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 		return false;
 	}
 	
+
 	
-	
+	/**
+	 * {@inheritDoc}
+	 */	
 	public void save(String key, byte[] value)
 	{
 		// Number of memory blocks required to store the value
@@ -97,8 +118,11 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 		lookupTable_.put(key, memoryLocations);
 	}
 
+
 	
-	
+	/**
+	 * {@inheritDoc}
+	 */	
 	public byte[] read(String key)
 	{
 		int memoryIndex;
@@ -137,8 +161,11 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 		return outputByteArray;
 	}
 
+
 	
-	
+	/**
+	 * {@inheritDoc}
+	 */		
 	public void delete(String key)
 	{
 		int memoryIndex;
