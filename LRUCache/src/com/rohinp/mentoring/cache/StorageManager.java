@@ -13,7 +13,7 @@ public interface StorageManager <K,V>
 	 * for storing the provided entry.
 	 *
 	 * @param key  Key for fetched entry
-	 * @returns boolean - available storage capacity 
+	 * @return boolean - available storage capacity 
 	 * @throws Missing from cache
 	 */		
 	public boolean isCapacityAvailable(V value);
@@ -32,7 +32,7 @@ public interface StorageManager <K,V>
 	 * key.
 	 *
 	 * @param key  Key for entry
-	 * @returns entry to be retrieved 
+	 * @return entry to be retrieved 
 	 * @throws Missing from cache
 	 */			
 	public V read(K key);
