@@ -1,0 +1,12 @@
+/bin
+.DS_Store
+*.swp
+*.iml
+*.ipr
+*.iws
+.classpath
+.settings/
+.springBeans/
+target/
+.classpath
+.class
