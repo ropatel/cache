@@ -5,7 +5,7 @@ import java.util.LinkedList;
 public class LRUCache<K> implements CacheManager<String>
 {
 	
-	private LinkedList <String> cacheIndex;
+	private LinkedList <String> cacheIndex_;
 
 	
 	
@@ -16,7 +16,7 @@ public class LRUCache<K> implements CacheManager<String>
 	 */		
 	public LRUCache()
 	{
-		cacheIndex = new LinkedList <String>();
+		cacheIndex_ = new LinkedList <String>();
 	}
 
 
@@ -25,13 +25,13 @@ public class LRUCache<K> implements CacheManager<String>
 	 */	
 	public void get(String key)
 	{
-		int targetIndex = cacheIndex.indexOf(key);
+		int targetIndex = cacheIndex_.indexOf(key);
 		
 		if (targetIndex < 0) {
 			//TODO - Throw exception - item missing from cache
 		} else {
-			cacheIndex.remove(targetIndex);
-			cacheIndex.push(key);
+			cacheIndex_.remove(targetIndex);
+			cacheIndex_.push(key);
 		}
 	}
 
@@ -41,7 +41,7 @@ public class LRUCache<K> implements CacheManager<String>
 	 */	
 	public void put(String key)
 	{				
-		cacheIndex.push(key);
+		cacheIndex_.push(key);
 	}
 
 
@@ -50,7 +50,7 @@ public class LRUCache<K> implements CacheManager<String>
 	 */		
 	public void evict()
 	{
-		cacheIndex.removeLast();
+		cacheIndex_.removeLast();
 	}
 	
 	
