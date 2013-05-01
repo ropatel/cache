@@ -2,12 +2,15 @@ package com.rohinp.mentoring.cache;
 
 import java.util.ArrayDeque;
 import java.util.HashMap;
+import java.util.Map;
 
 public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 {
-	private byte[] memory_;
-	private ArrayDeque <Integer> freeMemory_;
-	private HashMap <String,MemoryLocation> lookupTable_;
+	private byte[] storageMemory_;
+	private ArrayDeque <Integer> availableMemorySlots_;
+	
+	// Arguably a bad name.  key->location?
+	private final Map <String,MemoryLocation> lookupTable_;
 	
 	private static final int DEFAULT_MAX_SIZE = 6000;
 	private static final int BLOCK_SIZE = 4;
@@ -17,27 +20,52 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 	/**
 	 * Constructor
 	 * Initializes the memory, free memory stack 
-	 * and byte array hashmap.
+	 * and byte array hash map.
 	 *
 	 * @throws Missing from cache
 	 */	
 	public ByteArrayManager()
 	{		
+		this(DEFAULT_MAX_SIZE);
+	}
+	
+	private final static int maxStorageSlot()
+	{
+		return DEFAULT_MAX_SIZE - BLOCK_SIZE;
+	}
+	
+	private final static int totalMemorySlots()
+	{
+		return DEFAULT_MAX_SIZE / BLOCK_SIZE;
+	}
+	
+	private final void initMemoryStorage(final int size)
+	{
 		// Create initial memory space
-		memory_ = new byte[DEFAULT_MAX_SIZE];
+		storageMemory_ = new byte[size];
+		
+		int totalMemorySlots = ByteArrayManager.totalMemorySlots();
 		
 		// Create free memory stack
-		freeMemory_ = new ArrayDeque <Integer> (DEFAULT_MAX_SIZE / BLOCK_SIZE);
-		
+		availableMemorySlots_ = new ArrayDeque <Integer> (totalMemorySlots);		
+	}
+	
+	
+
+	public ByteArrayManager(final int size)
+	{
+		initMemoryStorage(size);
+
 		// Create initial memory index
 		lookupTable_ = new HashMap <String, MemoryLocation>();
 		
+		int maxMemorySlot = ByteArrayManager.maxStorageSlot();
+		
 		// Load free memory stack
-		for (int i = 0; i <= (DEFAULT_MAX_SIZE-BLOCK_SIZE); i += BLOCK_SIZE) {
-			freeMemory_.push(i);
+		for (int i = 0; i <= maxMemorySlot; i += BLOCK_SIZE) {
+			availableMemorySlots_.push(i);
 		}
 	}
-
 
 	
 	/**
@@ -55,7 +83,7 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 	 */	
 	public int getCapacity()
 	{
-		return (freeMemory_.size() * BLOCK_SIZE);
+		return (availableMemorySlots_.size() * BLOCK_SIZE);
 	}
 
 	
@@ -63,9 +91,9 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 	/**
 	 * {@inheritDoc}
 	 */	
-	public boolean isCapacityAvailable(byte[] value)
+	public boolean isCapacityAvailable(final byte[] value)
 	{
-		if (value.length <= freeMemory_.size() * BLOCK_SIZE) {
+		if (value.length <= availableMemorySlots_.size() * BLOCK_SIZE) {
 			return true;
 		} 
 		
@@ -77,7 +105,7 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 	/**
 	 * {@inheritDoc}
 	 */	
-	public void save(String key, byte[] value)
+	public void save(final String key, final byte[] value)
 	{
 		// Number of memory blocks required to store the value
 		int memoryBlocks = (int) Math.ceil(value.length / (double) BLOCK_SIZE);
@@ -88,6 +116,8 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 		// Track index in byte array
 		int valueIndex = 0;
 		
+		// iterator, encapsulation???
+		
 		// Create memory location object to track the memory locations.
 		MemoryLocation memoryLocations = new MemoryLocation(BLOCK_SIZE);
 	
@@ -95,20 +125,20 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 		for (int i = 0; i < memoryBlocks; i++) {
 			
 			// Get next available memory block
-			memoryIndex = freeMemory_.pop();
+			memoryIndex = availableMemorySlots_.pop();
 			
 			memoryLocations.put(memoryIndex);
 			
 			if (storageBalance >= BLOCK_SIZE) {
 				for (int j=0; j<BLOCK_SIZE; j++) {
-					memory_[memoryIndex] = value[valueIndex];
+					storageMemory_[memoryIndex] = value[valueIndex];
 					memoryIndex++;
 					valueIndex++;
 				}
 			} else {
 				memoryLocations.setTerminator(BLOCK_SIZE - storageBalance);
 				for (int k = 0; k < storageBalance; k++) {
-					memory_[memoryIndex] = value[valueIndex];
+					storageMemory_[memoryIndex] = value[valueIndex];
 					memoryIndex++;
 					valueIndex++;
 				}				
@@ -123,7 +153,7 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 	/**
 	 * {@inheritDoc}
 	 */	
-	public byte[] read(String key)
+	public byte[] read(final String key)
 	{
 		int memoryIndex;
 		int dataSize;
@@ -139,20 +169,20 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 			for (int i = 0; i < (memoryLocations.getBlockCount()-1); i++) {
 				memoryIndex = memoryLocations.get();
 				for (int j = 0; j < BLOCK_SIZE; i++) {
-					outputByteArray[outputIndex] = memory_[memoryIndex + j];
+					outputByteArray[outputIndex] = storageMemory_[memoryIndex + j];
 					outputIndex++;
 				}
 			}
 			memoryIndex = memoryLocations.get();
 			for (int i = 0; i < terminatorIndex; i++) {
-				outputByteArray[outputIndex] = memory_[memoryIndex + i];
+				outputByteArray[outputIndex] = storageMemory_[memoryIndex + i];
 			}			
 				outputIndex++;
 		} else {
 			for (int i = 0; i < memoryLocations.getBlockCount(); i++) {
 				memoryIndex = memoryLocations.get();
 				for (int j = 0; j < BLOCK_SIZE; j++) {
-					memoryByte = memory_[memoryIndex + j];
+					memoryByte = storageMemory_[memoryIndex + j];
 					outputByteArray[outputIndex] = memoryByte;
 					outputIndex++;
 				}				
@@ -166,7 +196,7 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 	/**
 	 * {@inheritDoc}
 	 */		
-	public void delete(String key)
+	public void delete(final String key)
 	{
 		int memoryIndex;
 		
@@ -175,9 +205,9 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 		for (int i = 0; i < memoryLocations.getBlockCount(); i++) {
 			memoryIndex = memoryLocations.get();
 			for (int j = 0; j < BLOCK_SIZE; j++) {
-				memory_[memoryIndex + j] = 0;
+				storageMemory_[memoryIndex + j] = 0;
 			}
-			freeMemory_.push(memoryIndex);
+			availableMemorySlots_.push(memoryIndex);
 		}
 		lookupTable_.remove(key);
 	}	

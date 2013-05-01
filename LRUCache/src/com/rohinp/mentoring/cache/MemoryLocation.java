@@ -4,7 +4,7 @@ import java.util.LinkedList;
 
 public class MemoryLocation
 {
-	private LinkedList <Integer> memoryIndex;
+	LinkedList <Integer> memoryIndex;
 	private int terminatorIndex;
 	private int blockSize;
 	

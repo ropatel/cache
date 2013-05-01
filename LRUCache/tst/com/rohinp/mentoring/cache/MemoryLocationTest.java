@@ -19,18 +19,8 @@ public class MemoryLocationTest {
 		
 		memLocs.put(startIndex);
 		org.junit.Assert.assertEquals(1, memLocs.getBlockCount());
-	}
-
-	@Test
-	public void testGet() {
-		memLocs.put(startIndex);
 		org.junit.Assert.assertEquals(30, memLocs.get());		
-	}
 
-	@Test
-	public void testGetBlockCount() {
-		memLocs.put(startIndex);
-		org.junit.Assert.assertEquals(1, memLocs.getBlockCount());
 	}
 
 	@Test
