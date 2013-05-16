@@ -1,14 +1,12 @@
 package com.rohinp.mentoring.cache;
 
-import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.Map;
 
 public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 {
 	private byte[] storageMemory_;
-	private ArrayDeque <Integer> availableMemorySlots_;
-	private FreeMemoryManager freeMemMgr;
+	private FreeMemoryManager freeMemMgr_;
 	
 	// Arguably a bad name.  key->location?
 	private final Map <String,MemoryLocation> lookupTable_;
@@ -35,39 +33,17 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 		initMemoryStorage(size);
 
 		// Create initial memory index
-		lookupTable_ = new HashMap <String, MemoryLocation>();
-		
-		int maxMemorySlot = ByteArrayManager.maxStorageSlot();
+		lookupTable_ = new HashMap <String, MemoryLocation>();		
 		
 		MemoryManagerConfig config = new MemoryManagerConfig();
 		
-		freeMemMgr = new FreeMemoryManager(config);
-		
-		// Load free memory stack
-		for (int i = 0; i <= maxMemorySlot; i += BLOCK_SIZE) {
-			availableMemorySlots_.push(i);
-		}
+		freeMemMgr_ = new FreeMemoryManager(config);
 	}	
-	
-	private final static int maxStorageSlot()
-	{
-		return DEFAULT_MAX_SIZE - BLOCK_SIZE;
-	}
-	
-	private final static int totalMemorySlots()
-	{
-		return DEFAULT_MAX_SIZE / BLOCK_SIZE;
-	}
 	
 	private final void initMemoryStorage(final int size)
 	{
 		// Create initial memory space
-		storageMemory_ = new byte[size];
-		
-		int totalMemorySlots = ByteArrayManager.totalMemorySlots();
-		
-		// Create free memory stack
-		availableMemorySlots_ = new ArrayDeque <Integer> (totalMemorySlots);		
+		storageMemory_ = new byte[size];				
 	}	
 	
 	/**
@@ -85,8 +61,7 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 	 */	
 	public int getCapacity()
 	{
-		return freeMemMgr.getFreeMemory();
-		//return (availableMemorySlots_.size() * BLOCK_SIZE);
+		return freeMemMgr_.getFreeMemory();
 	}
 
 	
@@ -96,16 +71,8 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 	 */	
 	public boolean isCapacityAvailable(final byte[] value)
 	{
-		return freeMemMgr.isCapacityAvailable(value);
-		/*
-		if (value.length <= availableMemorySlots_.size() * BLOCK_SIZE) {
-			return true;
-		}
-		
-		return false;
-		*/		
+		return freeMemMgr_.isCapacityAvailable(value);
 	}
-	
 
 	
 	/**
@@ -131,8 +98,7 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 		for (int i = 0; i < memoryBlocks; i++) {
 			
 			// Get next available memory block
-			memoryIndex = availableMemorySlots_.pop();
-			//memoryIndex = availableMemorySlots_.pop();
+			memoryIndex = freeMemMgr_.pop();
 			
 			memoryLocations.put(memoryIndex);
 			
@@ -214,7 +180,7 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 			for (int j = 0; j < BLOCK_SIZE; j++) {
 				storageMemory_[memoryIndex + j] = 0;
 			}
-			availableMemorySlots_.push(memoryIndex);
+			freeMemMgr_.push(memoryIndex);
 		}
 		lookupTable_.remove(key);
 	}	
