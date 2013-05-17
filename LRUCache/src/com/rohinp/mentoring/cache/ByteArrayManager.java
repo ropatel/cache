@@ -8,7 +8,7 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 {
 	private byte[] storageMemory_;
 	private ArrayDeque <Integer> availableMemorySlots_;
-	private FreeMemoryManager freeMemMgr;
+	private FreeMemoryManager freeMemMgr_;
 	
 	// Arguably a bad name.  key->location?
 	private final Map <String,MemoryLocation> lookupTable_;
@@ -41,7 +41,7 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 		
 		MemoryManagerConfig config = new MemoryManagerConfig();
 		
-		freeMemMgr = new FreeMemoryManager(config);
+		freeMemMgr_ = new FreeMemoryManager(config);
 		
 		// Load free memory stack
 		for (int i = 0; i <= maxMemorySlot; i += BLOCK_SIZE) {
@@ -85,8 +85,7 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 	 */	
 	public int getCapacity()
 	{
-		return freeMemMgr.getFreeMemory();
-		//return (availableMemorySlots_.size() * BLOCK_SIZE);
+		return freeMemMgr_.getFreeMemory();
 	}
 
 	
@@ -96,14 +95,8 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 	 */	
 	public boolean isCapacityAvailable(final byte[] value)
 	{
-		return freeMemMgr.isCapacityAvailable(value);
-		/*
-		if (value.length <= availableMemorySlots_.size() * BLOCK_SIZE) {
-			return true;
-		}
-		
-		return false;
-		*/		
+		return freeMemMgr_.isCapacityAvailable(value);
+	
 	}
 	
 
@@ -131,8 +124,7 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 		for (int i = 0; i < memoryBlocks; i++) {
 			
 			// Get next available memory block
-			memoryIndex = availableMemorySlots_.pop();
-			//memoryIndex = availableMemorySlots_.pop();
+			memoryIndex = freeMemMgr_.pop();
 			
 			memoryLocations.put(memoryIndex);
 			
@@ -214,7 +206,7 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 			for (int j = 0; j < BLOCK_SIZE; j++) {
 				storageMemory_[memoryIndex + j] = 0;
 			}
-			availableMemorySlots_.push(memoryIndex);
+			freeMemMgr_.push(memoryIndex);
 		}
 		lookupTable_.remove(key);
 	}	
