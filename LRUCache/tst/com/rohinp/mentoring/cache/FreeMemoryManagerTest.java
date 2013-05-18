@@ -21,11 +21,14 @@ public class FreeMemoryManagerTest {
 	public void testPush() {
 		int goodMemoryLocation = MAX_MEMORY - BLOCK_SIZE;
 		freeMemMgr_.pop();
+		// Mark: This should fail, right? (pushing the same memory location twice)
 		freeMemMgr_.push(goodMemoryLocation);
 	}	
 	
 	@Test (expected=OutOfMemoryError.class)
 	public void testPushWithFullMemory() {
+		// Mark: This should be broken up into two tests (1: bad memory location. 2: full memory).  Otherwise, you
+		//       don't really know which error condition you're reaching.
 		int badMemoryLocation = MAX_MEMORY + BLOCK_SIZE;
 		
 		freeMemMgr_.push(badMemoryLocation);
@@ -42,8 +45,11 @@ public class FreeMemoryManagerTest {
 	
 	@Test (expected=OutOfMemoryError.class)
 	public void testPopWithNoMemory() {
+		// Mark: Should we be asserting that totalSize() is right as well?
 		int totalMemLocations = MAX_MEMORY / BLOCK_SIZE;
 
+		// Mark: just for clarity, should the pop that fails be outside the loop?  How does your test
+		//       prove the exception is happening only on the last pop and not any other ones?
 		for (int i=0;i <= totalMemLocations; i++) {
 			freeMemMgr_.pop();
 		}

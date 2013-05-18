@@ -27,4 +27,12 @@ public interface CacheManager <K>
 	 * @throws Missing from cache
 	 */			
 	public void evict ();
+
+	/**
+	 * delete the LRU entry from the cache
+	 *
+	 * @throws Missing from cache
+	 */			
+	public void delete ();	
+	
 }

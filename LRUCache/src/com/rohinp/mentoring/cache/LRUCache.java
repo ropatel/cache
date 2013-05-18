@@ -5,6 +5,13 @@ import java.util.LinkedList;
 public class LRUCache<K> implements CacheManager<String>
 {
 	
+	@Override
+	public void delete() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
 	private LinkedList <String> cacheIndex_;
 
 	

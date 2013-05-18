@@ -8,6 +8,7 @@ public class MemoryManagerConfigTest {
 	private MemoryManagerConfig defaultConfig_;
 	private MemoryManagerConfig customConfig_;
 	
+	// Mark: Could the defautl constants be public and then you woulnd'thave to hardcode them twice (less operational work)
 	private static final int DEFAULT_MAX_MEMORY = 6000;
 	private static final int DEFAULT_BLOCK_SIZE = 4;
 	private static final int CUSTOM_MAX_MEMORY = 9000;
@@ -24,6 +25,7 @@ public class MemoryManagerConfigTest {
 	@Test (expected=IllegalArgumentException.class)
 	public void testIllegalArgumentException() {
 		@SuppressWarnings("unused")
+		// Mark: Magic number.  Either document or make it a named constant
 		MemoryManagerConfig customConfig = new MemoryManagerConfig(CUSTOM_MAX_MEMORY,7);
 	}
 	
