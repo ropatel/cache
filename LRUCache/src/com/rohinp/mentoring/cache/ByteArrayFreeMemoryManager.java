@@ -3,10 +3,10 @@ package com.rohinp.mentoring.cache;
 import java.util.ArrayDeque;
 
 public class ByteArrayFreeMemoryManager {
-	// Mark: Just need documentatin to what the integers refer to (more specifically, is the fact taht it's an integer relying on the fact
-	//       that you're using a bytearray memory?  Could this work for something that's not a bytearray manager?
+	// Mark: Just need documentation to what the integers refer to (more specifically, is the fact that it's an integer relying on the fact
+	//       that you're using a byte array memory?  Could this work for something that's not a byte array manager?
 	//       Also, should it be a long? and final?
-	private ArrayDeque <Integer> freeMemoryBlocks_;
+	private final ArrayDeque <Integer> freeMemoryBlocks_;
 	private final MemoryManagerConfig config_;
 	
 	
