@@ -2,30 +2,25 @@ package com.rohinp.mentoring.cache;
 
 import java.util.ArrayDeque;
 
-public class FreeMemoryManager {
+public class ByteArrayFreeMemoryManager {
 	// Mark: Just need documentatin to what the integers refer to (more specifically, is the fact taht it's an integer relying on the fact
 	//       that you're using a bytearray memory?  Could this work for something that's not a bytearray manager?
 	//       Also, should it be a long? and final?
 	private ArrayDeque <Integer> freeMemoryBlocks_;
-	
-	// Mark: Should you just store a config object?  Why copy the values out?
-	private final int maxMemory_;
-	private final int blockSize_;
+	private final MemoryManagerConfig config_;
 	
 	
-	public FreeMemoryManager(final MemoryManagerConfig config)
+	public ByteArrayFreeMemoryManager(final MemoryManagerConfig config)
 	{
-		maxMemory_ = config.getMaxMemory();
-		blockSize_ = config.getBlockSize();
+		config_ = config;
 		
-		// Should this calculation be in the config object?  You're kind of breaking an encapsulation barrier
-		int totalBlocks = getTotalBlocks();		
+		int totalBlocks = config.getTotalBlocks();		
 		int blockLocation;
 		
 		freeMemoryBlocks_ = new ArrayDeque <Integer> ();
 		
 		// Load free memory stack
-		for (int i = 0; i <= totalBlocks-1; i++) {
+		for (int i = 0; i <= totalBlocks - 1; i++) {
 			blockLocation = computeBlockLocation(i);
 			freeMemoryBlocks_.push(blockLocation);
 		}		
@@ -33,7 +28,7 @@ public class FreeMemoryManager {
 	
 	public void push(int blockLocation) throws OutOfMemoryError {
 		// Mark: not quite the right check?  You need to make sure that the same location isn't there more than once.
-		if (getFreeMemory() == maxMemory_) {
+		if (getFreeMemory() == config_.getMaxMemory()) {
 			throw new OutOfMemoryError("Operation failed - memory not available");
 		} else {
 			freeMemoryBlocks_.push(blockLocation);			
@@ -50,32 +45,18 @@ public class FreeMemoryManager {
 	
 	public int getFreeMemory()
 	{
-		return freeMemoryBlocks_.size() * blockSize_;
+		return freeMemoryBlocks_.size() * config_.getBlockSize();
 	}
 	
-	// Mark: Why not just take the size as a parameter?
-	public boolean isCapacityAvailable(byte[] value)
+	public boolean isCapacityAvailable(int size)
 	{
 		int freeMemory = getFreeMemory();
-		
-		// mark: This is better written as simply: return (value.length <= freeeMemory);
-		if (value.length <= freeMemory) {
-			return true;
-		} 
-		return false;		
+		return (size <= freeMemory);
 	}
-	
-	
-	private int getTotalBlocks()
+
+	private int computeBlockLocation(int blockIndex)
 	{
-		// divide by 0?
-		return maxMemory_ / blockSize_;
-	}
-	
-	// Mark: You're kind of playing fast and lose with the difference between int and Integer.  Why use hte object here but not other places?
-	private Integer computeBlockLocation(int blockIndex)
-	{
-		return blockIndex * blockSize_;
+		return blockIndex * config_.getBlockSize();
 	}
 
 }

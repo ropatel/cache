@@ -6,7 +6,7 @@ import java.util.Map;
 public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 {
 	private byte[] storageMemory_;
-	private FreeMemoryManager freeMemMgr_;
+	private ByteArrayFreeMemoryManager freeMemMgr_;
 	
 	// Arguably a bad name.  key->location?
 	private final Map <String,MemoryLocation> lookupTable_;
@@ -37,7 +37,7 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 		
 		MemoryManagerConfig config = new MemoryManagerConfig();
 		
-		freeMemMgr_ = new FreeMemoryManager(config);
+		freeMemMgr_ = new ByteArrayFreeMemoryManager(config);
 	}	
 	
 	private final void initMemoryStorage(final int size)
@@ -71,7 +71,7 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 	 */	
 	public boolean isCapacityAvailable(final byte[] value)
 	{
-		return freeMemMgr_.isCapacityAvailable(value);
+		return freeMemMgr_.isCapacityAvailable(value.length);
 	}
 
 	
