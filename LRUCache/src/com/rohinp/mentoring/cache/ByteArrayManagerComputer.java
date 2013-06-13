@@ -8,6 +8,16 @@ public class ByteArrayManagerComputer {
 		config_ = config;
 	}
 	
+	public int getTotalBlocks()
+	{
+		return config_.getMaxMemory() / config_.getBlockSize();
+	}
+	
+	public int getStorageBlockSize(int size)
+	{
+		return (int) Math.ceil(size / (double) config_.getBlockSize());
+	}
+	
 	
 
 }

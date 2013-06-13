@@ -8,11 +8,11 @@ public class MemoryLocation
 	private int terminatorIndex;
 	private int blockSize;
 	
-	MemoryLocation(int blockSize)
+	MemoryLocation(MemoryManagerConfig config)
 	{
 		memoryIndex = new LinkedList<Integer>();
 		terminatorIndex = 0;
-		this.blockSize = blockSize;
+		this.blockSize = config.getBlockSize();
 	}
 	
 	

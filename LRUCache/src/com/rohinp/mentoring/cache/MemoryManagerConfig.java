@@ -11,7 +11,8 @@ public class MemoryManagerConfig {
 	// computed based upon the host specifications.
 	public static final int DEFAULT_MAX_MEMORY_STORAGE_SIZE = 6000;
 	
-	// This value was chosen <need an explanation here>
+	// This value was chosen as a preliminary block size for storing byte arrays.
+	// The value should be adjusted based upon the usage metrics.
 	public static final int DEFAULT_BLOCK_SIZE = 4;
 	
 	public MemoryManagerConfig()
@@ -37,11 +38,6 @@ public class MemoryManagerConfig {
 	public int getBlockSize()
 	{
 		return blockSize_;
-	}
-
-	public int getTotalBlocks()
-	{
-		return maxMemory_ / blockSize_;
 	}	
 
 }

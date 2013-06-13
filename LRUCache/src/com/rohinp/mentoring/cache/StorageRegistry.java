@@ -15,7 +15,21 @@ public class StorageRegistry {
 		// Create initial memory index
 		registry_ = new HashMap <String, MemoryLocation>();		
 	}
-
 	
+	
+	public void save(MemoryLocation location)
+	{
+		registry_.put(registryKey_, location);
+	}
+	
+	public MemoryLocation fetch(String key)
+	{
+		return registry_.get(key);
+	}
+	
+	public void delete(String key)
+	{
+		registry_.remove(key);
+	}
 	
 }

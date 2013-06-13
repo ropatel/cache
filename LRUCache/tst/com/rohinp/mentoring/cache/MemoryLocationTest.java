@@ -10,7 +10,8 @@ public class MemoryLocationTest {
 
 	@Before
 	public void setUp() {
-		memLocs = new MemoryLocation(4);
+		MemoryManagerConfig config = new MemoryManagerConfig();
+		memLocs = new MemoryLocation(config);
 		startIndex = 30;
 	}
 	

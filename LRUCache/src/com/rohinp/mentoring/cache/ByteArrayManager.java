@@ -1,19 +1,16 @@
 package com.rohinp.mentoring.cache;
 
-import java.util.HashMap;
-import java.util.Map;
 
 public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 {
 	private byte[] storageMemory_;
 	private ByteArrayFreeMemoryManager freeMemMgr_;
 	
-	// Arguably a bad name.  key->location?
-	private final Map <String,MemoryLocation> lookupTable_;
+	private StorageRegistry registry_;
 	
-	private static final int DEFAULT_MAX_SIZE = 6000;
-	private static final int BLOCK_SIZE = 4;
-
+	private final MemoryManagerConfig config_;
+	
+	private final ByteArrayManagerComputer computer_;	
 	
 	
 	/**
@@ -24,20 +21,15 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 	 * @throws Missing from cache
 	 */	
 	public ByteArrayManager()
-	{		
-		this(DEFAULT_MAX_SIZE);
-	}
-
-	public ByteArrayManager(final int size)
-	{
-		initMemoryStorage(size);
-
-		// Create initial memory index
-		lookupTable_ = new HashMap <String, MemoryLocation>();		
+	{	
 		
-		MemoryManagerConfig config = new MemoryManagerConfig();
+		config_ = new MemoryManagerConfig();
 		
-		freeMemMgr_ = new ByteArrayFreeMemoryManager(config);
+		initMemoryStorage(config_.getMaxMemory());
+		
+		computer_ = new ByteArrayManagerComputer(config_);
+		
+		freeMemMgr_ = new ByteArrayFreeMemoryManager(config_);
 	}	
 	
 	private final void initMemoryStorage(final int size)
@@ -46,12 +38,14 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 		storageMemory_ = new byte[size];				
 	}	
 	
+
+	
 	/**
 	 * Returns the default maximum storage capacity
 	 */	
 	public int getDefaultMaxCapacity()
 	{
-		return DEFAULT_MAX_SIZE;
+		return config_.getMaxMemory();
 	}
 
 	
@@ -80,8 +74,10 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 	 */	
 	public void save(final String key, final byte[] value)
 	{
+		// Create a storage registry to track the memory locations
+		registry_ = new StorageRegistry(key);
 		// Number of memory blocks required to store the value
-		int memoryBlocks = (int) Math.ceil(value.length / (double) BLOCK_SIZE);
+		int memoryBlocks = computer_.getStorageBlockSize(value.length);
 		// Track memory balance
 		int storageBalance = value.length;
 		// Track index in memory storage
@@ -92,7 +88,7 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 		// iterator, encapsulation???
 		
 		// Create memory location object to track the memory locations.
-		MemoryLocation memoryLocations = new MemoryLocation(BLOCK_SIZE);
+		MemoryLocation memoryLocations = new MemoryLocation(config_);
 	
 		// Store value to memory 
 		for (int i = 0; i < memoryBlocks; i++) {
@@ -102,23 +98,23 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 			
 			memoryLocations.put(memoryIndex);
 			
-			if (storageBalance >= BLOCK_SIZE) {
-				for (int j=0; j<BLOCK_SIZE; j++) {
+			if (storageBalance >= config_.getBlockSize()) {
+				for (int j=0; j<config_.getBlockSize(); j++) {
 					storageMemory_[memoryIndex] = value[valueIndex];
 					memoryIndex++;
 					valueIndex++;
 				}
 			} else {
-				memoryLocations.setTerminator(BLOCK_SIZE - storageBalance);
+				memoryLocations.setTerminator(config_.getBlockSize() - storageBalance);
 				for (int k = 0; k < storageBalance; k++) {
 					storageMemory_[memoryIndex] = value[valueIndex];
 					memoryIndex++;
 					valueIndex++;
 				}				
 			}
-			storageBalance -= BLOCK_SIZE;
+			storageBalance -= config_.getBlockSize();
 		}
-		lookupTable_.put(key, memoryLocations);
+		registry_.save(memoryLocations);
 	}
 
 
@@ -133,7 +129,7 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 		int outputIndex = 0;
 		byte memoryByte;
 		
-		MemoryLocation memoryLocations = lookupTable_.get(key);
+		MemoryLocation memoryLocations = registry_.fetch(key);
 		int terminatorIndex = memoryLocations.getTerminator();
 		dataSize = memoryLocations.getSize();		
 		byte[] outputByteArray = new byte[dataSize];
@@ -141,7 +137,7 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 		if (terminatorIndex > 0) {
 			for (int i = 0; i < (memoryLocations.getBlockCount()-1); i++) {
 				memoryIndex = memoryLocations.get();
-				for (int j = 0; j < BLOCK_SIZE; i++) {
+				for (int j = 0; j < config_.getBlockSize(); i++) {
 					outputByteArray[outputIndex] = storageMemory_[memoryIndex + j];
 					outputIndex++;
 				}
@@ -154,7 +150,7 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 		} else {
 			for (int i = 0; i < memoryLocations.getBlockCount(); i++) {
 				memoryIndex = memoryLocations.get();
-				for (int j = 0; j < BLOCK_SIZE; j++) {
+				for (int j = 0; j < config_.getBlockSize(); j++) {
 					memoryByte = storageMemory_[memoryIndex + j];
 					outputByteArray[outputIndex] = memoryByte;
 					outputIndex++;
@@ -173,16 +169,16 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 	{
 		int memoryIndex;
 		
-		MemoryLocation memoryLocations = lookupTable_.get(key);
+		MemoryLocation memoryLocations = registry_.fetch(key);
 		
 		for (int i = 0; i < memoryLocations.getBlockCount(); i++) {
 			memoryIndex = memoryLocations.get();
-			for (int j = 0; j < BLOCK_SIZE; j++) {
+			for (int j = 0; j < config_.getBlockSize(); j++) {
 				storageMemory_[memoryIndex + j] = 0;
 			}
 			freeMemMgr_.push(memoryIndex);
 		}
-		lookupTable_.remove(key);
+		registry_.delete(key);
 	}	
 	
 	
