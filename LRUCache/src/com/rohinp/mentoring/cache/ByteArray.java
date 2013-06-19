@@ -26,7 +26,8 @@ public class ByteArray implements Iterator<Byte>{
 	}
 
 	@Override
-	public void remove() {		
+	public void remove() {
+		//TODO Throw an unsupported method.
 	}
 
 }
