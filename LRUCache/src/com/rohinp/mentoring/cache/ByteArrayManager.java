@@ -38,10 +38,10 @@ public class ByteArrayManager <K,V> implements StorageManager <String,byte[]>
 		storageMemory_ = new byte[size];				
 	}	
 	
-
-	
 	/**
 	 * Returns the default maximum storage capacity
+	 * 
+	 * @return int Default maximum storage capacity.
 	 */	
 	public int getDefaultMaxCapacity()
 	{

@@ -3,10 +3,8 @@ package com.rohinp.mentoring.cache;
 import java.util.ArrayDeque;
 
 public class ByteArrayFreeMemoryManager {
-	// Mark: Just need documentation to what the integers refer to (more specifically, is the fact that it's an integer relying on the fact
-	//       that you're using a byte array memory?  Could this work for something that's not a byte array manager?
-	//       Also, should it be a long? and final?
-	// Stack - contains the indices within the array
+		
+	// Stack - contains the indices within the byte array memory
 	private final ArrayDeque <Integer> freeMemoryBlocks_;
 	private final MemoryManagerConfig config_;
 	private final ByteArrayManagerComputer computer_;
