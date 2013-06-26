@@ -2,56 +2,40 @@ package com.rohinp.mentoring.cache;
 
 import java.util.ArrayList;
 
-public class LRUDriver {
-	
-	private final LRUCache lru = new LRUCache();
-	private final ByteArrayManager memoryManager = new ByteArrayManager();
-	
-	public LRUDriver() {
-		
-	}
-
+public interface CacheDriver <K,V> {	
 	
 	/**
-	 * Puts the provided byte array into
+	 * Puts the provided value into
 	 * the cache using the provided key. 
 	 * 
-	 * @param String key Key for the byte array to be stored.
-	 * @param byte[] value The byte array to be stored.
+	 * @param <K> key Key for the <V> value to be stored.
+	 * @param <V> value The <V> value to be stored.
 	 */
-	public boolean put(String key ,byte[] value) {
-		return false;
-	}
+	public boolean put(K key ,V value);
 
 	/**
-	 * Returns the byte array corresponding to
+	 * Returns the value corresponding to
 	 * the provided key. 
 	 * 
-	 * @param String key Key for the byte array to be returned.
-	 * @return byte[] value The byte array to be returned.
+	 * @param <K> key Key for the <V> value to be returned.
+	 * @return <V> value The <V> value to be returned.
 	 */	
-	public byte[] get(String key) {
-		return null;
-	}
+	public byte[] get(K key);
 
 	/**
-	 * Deletes the byte array from the cache using
+	 * Deletes the value from the cache using
 	 * the provided key. 
 	 * 
-	 * @param String key Key for the byte array to be deleted.
+	 * @param <K> key Key for the <V> value to be deleted.
 	 */	
-	public void delete(String key) {
-		
-	}
+	public void delete(K key);
 	
 	/**
-	 * Returns a list of keys which map to byte
-	 * arrays stored in the cache.
+	 * Returns a list of keys which map to values
+	 * stored in the cache.
 	 * 
-	 * @return ArrayList<String> List of keys which map to byte arrays in the cache.
+	 * @return ArrayList<K> List of keys which map to <V> values in the cache.
 	 */
-	public ArrayList<String> list() {
-		return null;
-	}
+	public ArrayList<K> list();
 
 }
